@@ -1,0 +1,24 @@
+# Node
+node_modules/
+**/node_modules/
+dist/
+out/
+.vscode/
+
+# Vite / build
+web-demo/dist/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.env.*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# VS Code extension artifacts
+*.vsix

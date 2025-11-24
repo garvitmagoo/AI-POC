@@ -1,0 +1,150 @@
+
+/* Layout */
+/* ensure root and editor container fill viewport */
+.app-root {
+  display: flex !important;
+  height: 100vh;
+  min-height: 600px;
+  overflow: hidden;
+  position: relative;
+}
+
+.editor-container {
+  flex: 1 1 auto !important;
+  width: 100%; /* leave space for panel */
+  box-sizing: border-box;
+  min-width: 0;               /* prevents editor from forcing panel off-screen */
+  height: 100vh;
+  padding-top: 20px;      /* <-- add the top gap you asked for */
+  padding-left: 12px;     /* small horizontal inset so gutter isn't flush to edge */
+  padding-right: 12px;
+  background: #1e1e1e;
+  border-right: 1px solid #333;
+}
+
+/* force panel to occupy right area */
+.a11y-panel {
+  background: #1a1a1a;
+  color: #ddd;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-left: 1px solid #333;
+  width: 360px !important;
+}
+
+/* PANEL HEADING */
+.a11y-panel h2 {
+  font-size: 18px;        /* slightly smaller than before to avoid clipping */
+  margin: 0 0 12px 0;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #222;
+  color: #fff;
+}
+
+/* LIST WRAPPER */
+.a11y-list {
+  flex: 1;
+}
+
+.issues-column {
+  width: 360px;
+  min-width: 280px;
+  max-width: 420px;
+  box-sizing: border-box;
+  padding: 18px;          /* give header some room from edges */
+  border-left: 1px solid #222;
+  overflow-y: auto;
+  background: #0f0f0f;
+}
+
+.monaco-editor{
+  overflow: auto !important;
+}
+/* INDIVIDUAL ISSUE CARD */
+.a11y-issue {
+  width:360px !important;
+  margin: 0 0 16px 0;
+  padding: 14px;
+  border-radius: 8px;
+  overflow: visible;
+}
+
+/* RULE ID */
+.a11y-issue .rule {
+  font-size: 16px;
+  font-weight: 600;
+  color: #4da3ff;
+}
+
+/* MESSAGE */
+.a11y-issue .message {
+  font-size: 14px;
+  margin: 6px 0 12px 0;
+  color: #ccc;
+  line-height: 1.4;
+}
+
+/* BUTTONS */
+.a11y-issue button {
+  width: 100%;
+  text-align: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: none;
+}
+
+.btn-primary {
+  background: #007aff;
+  color: white;
+  border: none;
+}
+
+.btn-ghost {
+  background: #333;
+  color: #eee;
+}
+
+.btn-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* PANEL FOOTER */
+.panel-footer {
+  margin-top: 20px;
+}
+
+.panel-footer button {
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+}
+/* Monaco decoration helper classes */
+.a11y-highlight { background-color: rgba(79,195,247,0.08); border-left: 3px solid rgba(79,195,247,0.6); }
+.a11y-gutter {
+  width: 14px; height: 14px;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%234FC3F7' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='3'/></svg>");
+  background-repeat: no-repeat; background-position: center;
+}
+
+/* Modal small tweak */
+.preview-modal-pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", "Noto Mono", monospace;
+  font-size: 13px;
+  color: #e6eef8;
+}
+
+.a11y-issue .btn-disabled{
+  opacity: 1;
+  color: #ffffff;
+  cursor: not-allowed;
+}
+
+/* Small responsive tweak */
+@media (max-width: 900px) {
+  .a11y-panel { width: 320px; }
+}

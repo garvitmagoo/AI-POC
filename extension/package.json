@@ -1,0 +1,81 @@
+{
+  "name": "a11y-poc",
+  "displayName": "A11y POC",
+  "publisher": "local",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+     "onView:a11yPanel",
+    "onStartupFinished",
+    "onCommand:a11y.showPanel",
+    "onCommand:a11y.fixAll",
+    "onCommand:a11y.activate",
+    "onLanguage:javascriptreact",
+    "onLanguage:typescriptreact"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "a11y.showPanel",
+        "title": "A11y: Show Accessibility Panel"
+      },
+      {
+        "command": "a11y.activate",
+        "title": "A11y: Activate Extension"
+      },
+      { "command": "a11y.fixAll", "title": "A11y: Apply All Fixes in File" }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "a11yView",
+          "title": "A11y",
+          "icon": "$(checklist)"
+        }
+      ]
+    },
+    "views": {
+      "a11yView": [
+        {
+          "id": "a11yPanel",
+          "name": "Accessibility Issues"
+        }
+      ]
+    },
+    "languages": [
+      {
+        "id": "javascriptreact",
+        "extensions": [
+          ".jsx"
+        ],
+        "aliases": [
+          "JavaScript React",
+          "JSX"
+        ]
+      },
+      {
+        "id": "typescriptreact",
+        "extensions": [
+          ".tsx"
+        ],
+        "aliases": [
+          "TypeScript React",
+          "TSX"
+        ]
+      }
+    ]
+  },
+  "scripts": {
+  "watch": "tsc -watch -p ./",
+  "compile": "tsc -p ./",
+  "vscode:prepublish": "npm run compile"
+},
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/vscode": "^1.70.0",
+    "typescript": "^5.9.3"
+  }
+}
