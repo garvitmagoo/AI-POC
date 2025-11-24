@@ -21,7 +21,7 @@ This project is an accessibility productivity proof-of-concept:
 ├── placeholder-generator/      # FastAPI (Python) backend for placeholder text
 └── vscode-extension/           # parked VS Code extension (not used now)
 
-1. Prerequisites
+## Prerequisites
 
 You’ll need:
 
@@ -33,14 +33,14 @@ Git (optional but recommended)
 
 macOS / Linux / WSL / Windows – any OS is fine
 
-2. Clone the Repository
+## Clone the Repository
 
 If you haven’t already:
 
 git clone https://github.com/<your-username>/<your-repo>.git
 cd <your-repo>         
 
-3. Python Backend – Local Setup
+## Python Backend – Local Setup
 
 The backend is a small FastAPI app that takes code as input and returns suggested edits
 (e.g. insert alt="TODO: describe" or better heuristics).
@@ -81,7 +81,7 @@ You can sanity-check in another terminal:
 
 curl http://localhost:5000/docs
 
-4. Frontend (web-demo) – Local Setup
+## Frontend (web-demo) – Local Setup
 
 The web demo is a Vite + React app using Monaco Editor.
 
@@ -126,7 +126,7 @@ Open http://localhost:5173 in your browser.
 
 Make sure the Python backend from step 3 is still running on port 5000.
 
-5. Using the Web Demo Locally
+## Using the Web Demo Locally
 
 Once both servers are running:
 
