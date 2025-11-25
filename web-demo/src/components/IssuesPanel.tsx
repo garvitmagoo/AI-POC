@@ -8,87 +8,114 @@ type Props = {
   handleGeneratePlaceholders: () => void;
 };
 
-export default function IssuesPanel({ issues, onFixIssue, onJumpIssue, onPreviewIssue, handleGeneratePlaceholders }: Props) {
+export default function IssuesPanel({
+  issues,
+  onFixIssue,
+  onJumpIssue,
+  onPreviewIssue,
+  handleGeneratePlaceholders,
+}: Props) {
+  const panelStyle: React.CSSProperties = {
+    background: "linear-gradient(180deg, #020b18, #071826)",
+    padding: 16,
+    color: "white",
+    height: "100%",
+    boxSizing: "border-box",
+    overflowY: "auto",
+    borderLeft: "1px solid rgba(255,255,255,0.05)",
+  };
+
+  const issueCardStyle: React.CSSProperties = {
+    borderRadius: 8,
+    padding: 12,
+    background: "rgba(255,255,255,0.03)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    display: "flex",
+    gap: 12,
+  };
+
+  const actionButtonBase: React.CSSProperties = {
+    width: 70,
+    height: 32,
+    borderRadius: 6,
+    border: "none",
+    cursor: "pointer",
+    fontSize: 13,
+  };
+
+  const actionColumnStyle: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 6,
+  };
+
   return (
-    <div style={{
-      background: "linear-gradient(180deg,#031025, #071826)",
-      padding: 12,
-      color: "white",
-      height: "100%",
-      boxSizing: "border-box",
-      overflowY: "auto"
-    }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <h3 style={{ margin: 0 }}>Accessibility Issues ({issues.length})</h3>
-        {/* Keep a small Fix All here if desired; we moved Fix All to top toolbar so it's optional */}
-      </div>
+    <div style={panelStyle}>
+      <h3 style={{ margin: "0 0 14px", fontWeight: 600 }}>
+        Accessibility Issues ({issues.length})
+      </h3>
 
       {issues.length === 0 && (
-        <div style={{ opacity: 0.75 }}>No issues found.</div>
+        <div style={{ opacity: 0.7, fontSize: 14 }}>
+          No issues detected. Paste code on the left and start editing.
+        </div>
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {issues.map((issue, idx) => (
-          <div key={`${issue.id}-${idx}`} style={{
-            borderRadius: 8,
-            padding: 12,
-            background: "rgba(255,255,255,0.02)",
-            boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.02)",
-            display: "flex",
-            gap: 12,
-            alignItems: "flex-start"
-          }}>
+          <div key={`${issue.id}-${idx}`} style={issueCardStyle}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: "#9ad6ff", marginBottom: 6 }}>{issue.id}</div>
-              <div style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", marginBottom: 8 }}>{issue.message}</div>
-              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>Line {issue.start.line + 1}</div>
+              <div style={{ fontSize: 15, fontWeight: 600, color: "#7dd3fc" }}>
+                {issue.id}
+              </div>
+              <div
+                style={{
+                  fontSize: 13,
+                  margin: "6px 0",
+                  lineHeight: 1.4,
+                  color: "rgba(255,255,255,0.85)",
+                }}
+              >
+                {issue.message}
+              </div>
+              <div style={{ fontSize: 12, opacity: 0.5 }}>
+                Line {issue.start.line + 1}
+              </div>
             </div>
 
-            {/* compact actions: small icon-like buttons */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={actionColumnStyle}>
+              {/* Fix button */}
               <button
                 onClick={() => onFixIssue(issue)}
-                title="Apply fix"
                 style={{
-                  width: 64,
-                  height: 36,
-                  borderRadius: 8,
+                  ...actionButtonBase,
                   background: "#0ea5e9",
                   color: "white",
-                  border: "none",
-                  cursor: "pointer"
                 }}
               >
                 Fix
               </button>
 
+              {/* Preview button */}
               <button
                 onClick={() => onPreviewIssue(issue)}
-                title="Preview fix"
                 style={{
-                  width: 64,
-                  height: 36,
-                  borderRadius: 8,
+                  ...actionButtonBase,
                   background: "transparent",
+                  border: "1px solid rgba(255,255,255,0.12)",
                   color: "white",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  cursor: "pointer"
                 }}
               >
                 Preview
               </button>
 
+              {/* Jump button */}
               <button
                 onClick={() => onJumpIssue(issue)}
-                title="Jump to location"
                 style={{
-                  width: 64,
-                  height: 36,
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,0.06)",
+                  ...actionButtonBase,
+                  background: "rgba(255,255,255,0.1)",
                   color: "white",
-                  border: "none",
-                  cursor: "pointer"
                 }}
               >
                 Jump
@@ -96,23 +123,26 @@ export default function IssuesPanel({ issues, onFixIssue, onJumpIssue, onPreview
             </div>
           </div>
         ))}
-        {issues.length !== 0 &&
-        <button
-                onClick={handleGeneratePlaceholders}
-                title="Apply heuristics fix "
-                style={{
-                  width: '100%',
-                  height: 36,
-                  borderRadius: 8,
-                  background: "#0ea5e9",
-                  color: "white",
-                  border: "none",
-                  cursor: "pointer"
-                }}
-              >
-                Heuristics Fix
-              </button>
-}
+
+        {issues.length > 0 && (
+          <button
+            onClick={handleGeneratePlaceholders}
+            style={{
+              marginTop: 10,
+              width: "100%",
+              height: 40,
+              borderRadius: 8,
+              background: "#22c55e",
+              color: "white",
+              border: "none",
+              cursor: "pointer",
+              fontSize: 15,
+              fontWeight: 600,
+            }}
+          >
+            Auto-Fix with AI
+          </button>
+        )}
       </div>
     </div>
   );

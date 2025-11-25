@@ -1,4 +1,3 @@
-
 /* Layout */
 /* ensure root and editor container fill viewport */
 .app-root {
@@ -7,16 +6,17 @@
   min-height: 600px;
   overflow: hidden;
   position: relative;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
 .editor-container {
   flex: 1 1 auto !important;
   width: 100%; /* leave space for panel */
   box-sizing: border-box;
-  min-width: 0;               /* prevents editor from forcing panel off-screen */
+  min-width: 0; /* prevents editor from forcing panel off-screen */
   height: 100vh;
-  padding-top: 20px;      /* <-- add the top gap you asked for */
-  padding-left: 12px;     /* small horizontal inset so gutter isn't flush to edge */
+  padding-top: 20px; /* <-- add the top gap you asked for */
+  padding-left: 12px; /* small horizontal inset so gutter isn't flush to edge */
   padding-right: 12px;
   background: #1e1e1e;
   border-right: 1px solid #333;
@@ -38,7 +38,7 @@
 
 /* PANEL HEADING */
 .a11y-panel h2 {
-  font-size: 18px;        /* slightly smaller than before to avoid clipping */
+  font-size: 18px; /* slightly smaller than before to avoid clipping */
   margin: 0 0 12px 0;
   padding-bottom: 8px;
   border-bottom: 1px solid #222;
@@ -55,18 +55,18 @@
   min-width: 280px;
   max-width: 420px;
   box-sizing: border-box;
-  padding: 18px;          /* give header some room from edges */
+  padding: 18px; /* give header some room from edges */
   border-left: 1px solid #222;
   overflow-y: auto;
   background: #0f0f0f;
 }
 
-.monaco-editor{
+.monaco-editor {
   overflow: auto !important;
 }
 /* INDIVIDUAL ISSUE CARD */
 .a11y-issue {
-  width:360px !important;
+  width: 360px !important;
   margin: 0 0 16px 0;
   padding: 14px;
   border-radius: 8px;
@@ -124,21 +124,27 @@
   border-radius: 6px;
 }
 /* Monaco decoration helper classes */
-.a11y-highlight { background-color: rgba(79,195,247,0.08); border-left: 3px solid rgba(79,195,247,0.6); }
+.a11y-highlight {
+  background-color: rgba(79, 195, 247, 0.08);
+  border-left: 3px solid rgba(79, 195, 247, 0.6);
+}
 .a11y-gutter {
-  width: 14px; height: 14px;
+  width: 14px;
+  height: 14px;
   background-image: url("data:image/svg+xml;utf8,<svg fill='%234FC3F7' xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='3'/></svg>");
-  background-repeat: no-repeat; background-position: center;
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 /* Modal small tweak */
 .preview-modal-pre {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Segoe UI Mono", "Noto Mono", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
+    "Segoe UI Mono", "Noto Mono", monospace;
   font-size: 13px;
   color: #e6eef8;
 }
 
-.a11y-issue .btn-disabled{
+.a11y-issue .btn-disabled {
   opacity: 1;
   color: #ffffff;
   cursor: not-allowed;
@@ -146,5 +152,7 @@
 
 /* Small responsive tweak */
 @media (max-width: 900px) {
-  .a11y-panel { width: 320px; }
+  .a11y-panel {
+    width: 320px;
+  }
 }

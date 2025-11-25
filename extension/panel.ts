@@ -9,21 +9,30 @@ export class A11yPanelProvider implements vscode.WebviewViewProvider {
   constructor(private readonly context: vscode.ExtensionContext) {}
 
   resolveWebviewView(webviewView: vscode.WebviewView) {
-   vscode.window.showInformationMessage("A11y panel resolved (Extension Host)");
-  console.log("A11yPanelProvider.resolveWebviewView called (Extension Host)");
+    vscode.window.showInformationMessage(
+      "A11y panel resolved (Extension Host)"
+    );
+    console.log("A11yPanelProvider.resolveWebviewView called (Extension Host)");
     this.view = webviewView;
     this.view.webview.options = { enableScripts: true };
 
-    this.view.webview.onDidReceiveMessage(msg => {
-      if (msg.command === "jump" && typeof msg.line === "number") {
-        this.jumpToLine(msg.line);
-      }
-    }, null, this.disposables);
+    this.view.webview.onDidReceiveMessage(
+      (msg) => {
+        if (msg.command === "jump" && typeof msg.line === "number") {
+          this.jumpToLine(msg.line);
+        }
+      },
+      null,
+      this.disposables
+    );
 
     this.disposables.push(
       vscode.window.onDidChangeActiveTextEditor(() => this.refresh()),
-      vscode.workspace.onDidChangeTextDocument(e => {
-        if (vscode.window.activeTextEditor && e.document === vscode.window.activeTextEditor.document) {
+      vscode.workspace.onDidChangeTextDocument((e) => {
+        if (
+          vscode.window.activeTextEditor &&
+          e.document === vscode.window.activeTextEditor.document
+        ) {
           this.refresh();
         }
       })
@@ -34,7 +43,7 @@ export class A11yPanelProvider implements vscode.WebviewViewProvider {
   }
 
   dispose() {
-    this.disposables.forEach(d => d.dispose());
+    this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }
 
@@ -48,10 +57,10 @@ export class A11yPanelProvider implements vscode.WebviewViewProvider {
 
     const code = editor.document.getText();
     const issues = analyzeCode(code);
-    const formatted = issues.map(i => ({
+    const formatted = issues.map((i) => ({
       rule: i.id,
       message: i.message,
-      line: i.start.line + 1
+      line: i.start.line + 1,
     }));
 
     this.updateHTML(formatted);
@@ -61,7 +70,10 @@ export class A11yPanelProvider implements vscode.WebviewViewProvider {
     const editor = vscode.window.activeTextEditor;
     if (!editor) return;
     const pos = new vscode.Position(Math.max(0, line - 1), 0);
-    editor.revealRange(new vscode.Range(pos, pos), vscode.TextEditorRevealType.InCenter);
+    editor.revealRange(
+      new vscode.Range(pos, pos),
+      vscode.TextEditorRevealType.InCenter
+    );
     editor.selection = new vscode.Selection(pos, pos);
   }
 
@@ -72,7 +84,7 @@ export class A11yPanelProvider implements vscode.WebviewViewProvider {
         ? `<div class="empty">No accessibility issues found 🎉</div>`
         : items
             .map(
-              it => `<div class="issue" data-line="${it.line}">
+              (it) => `<div class="issue" data-line="${it.line}">
                       <b>${escapeHtml(it.rule)}</b>: ${escapeHtml(it.message)}
                       <span class="line">[Line ${it.line}]</span>
                     </div>`
@@ -114,8 +126,7 @@ function escapeHtml(s: string): string {
     "<": "&lt;",
     ">": "&gt;",
     '"': "&quot;",
-    "'": "&#39;"
+    "'": "&#39;",
   };
-  return s.replace(/[&<>"']/g, ch => map[ch] ?? "");
+  return s.replace(/[&<>"']/g, (ch) => map[ch] ?? "");
 }
-
