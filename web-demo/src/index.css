@@ -1,133 +1,64 @@
-/* Layout */
-/* ensure root and editor container fill viewport */
-.app-root {
-  display: flex !important;
-  height: 100vh;
-  min-height: 600px;
-  overflow: hidden;
-  position: relative;
-  font-family: Arial, Helvetica, sans-serif;
+/* -------- Global layout basics -------- */
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
+
+/* Root two-column layout (desktop) */
+
+.app-root {
+  display: flex;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+  background: #020617;
+}
+
+/* Monaco editor container */
 
 .editor-container {
-  flex: 1 1 auto !important;
-  width: 100%; /* leave space for panel */
+  flex: 1 1 auto;
+  min-width: 0; /* important so editor doesn't push panel offscreen */
   box-sizing: border-box;
-  min-width: 0; /* prevents editor from forcing panel off-screen */
-  height: 100vh;
-  padding-top: 20px; /* <-- add the top gap you asked for */
-  padding-left: 12px; /* small horizontal inset so gutter isn't flush to edge */
-  padding-right: 12px;
+  padding: 16px 12px;
   background: #1e1e1e;
-  border-right: 1px solid #333;
+  border-right: 1px solid #111827;
 }
 
-/* force panel to occupy right area */
+/* Right-hand accessibility panel */
+
 .a11y-panel {
-  background: #1a1a1a;
-  color: #ddd;
-  height: 100%;
+  flex: 0 0 360px;
+  max-width: 420px;
+  min-width: 280px;
+  box-sizing: border-box;
+  border-left: 1px solid #111827;
+  background: #020617;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  box-sizing: border-box;
   overflow-y: auto;
-  border-left: 1px solid #333;
-  width: 360px !important;
 }
 
-/* PANEL HEADING */
-.a11y-panel h2 {
-  font-size: 18px; /* slightly smaller than before to avoid clipping */
-  margin: 0 0 12px 0;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #222;
-  color: #fff;
-}
-
-/* LIST WRAPPER */
-.a11y-list {
-  flex: 1;
-}
-
-.issues-column {
-  width: 360px;
-  min-width: 280px;
-  max-width: 420px;
-  box-sizing: border-box;
-  padding: 18px; /* give header some room from edges */
-  border-left: 1px solid #222;
-  overflow-y: auto;
-  background: #0f0f0f;
-}
+/* Make sure Monaco itself can scroll inside its container */
 
 .monaco-editor {
   overflow: auto !important;
 }
-/* INDIVIDUAL ISSUE CARD */
-.a11y-issue {
-  width: 360px !important;
-  margin: 0 0 16px 0;
-  padding: 14px;
-  border-radius: 8px;
-  overflow: visible;
-}
 
-/* RULE ID */
-.a11y-issue .rule {
-  font-size: 16px;
-  font-weight: 600;
-  color: #4da3ff;
-}
+/* -------- Monaco decoration helpers -------- */
 
-/* MESSAGE */
-.a11y-issue .message {
-  font-size: 14px;
-  margin: 6px 0 12px 0;
-  color: #ccc;
-  line-height: 1.4;
-}
-
-/* BUTTONS */
-.a11y-issue button {
-  width: 100%;
-  text-align: center;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: none;
-}
-
-.btn-primary {
-  background: #007aff;
-  color: white;
-  border: none;
-}
-
-.btn-ghost {
-  background: #333;
-  color: #eee;
-}
-
-.btn-disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-/* PANEL FOOTER */
-.panel-footer {
-  margin-top: 20px;
-}
-
-.panel-footer button {
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-}
-/* Monaco decoration helper classes */
 .a11y-highlight {
   background-color: rgba(79, 195, 247, 0.08);
   border-left: 3px solid rgba(79, 195, 247, 0.6);
 }
+
 .a11y-gutter {
   width: 14px;
   height: 14px;
@@ -136,7 +67,8 @@
   background-position: center;
 }
 
-/* Modal small tweak */
+/* Code font used in PreviewModal */
+
 .preview-modal-pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
     "Segoe UI Mono", "Noto Mono", monospace;
@@ -144,15 +76,29 @@
   color: #e6eef8;
 }
 
-.a11y-issue .btn-disabled {
-  opacity: 1;
-  color: #ffffff;
-  cursor: not-allowed;
-}
+/* -------- Mobile / small screens -------- */
 
-/* Small responsive tweak */
-@media (max-width: 900px) {
+@media (max-width: 768px) {
+  /* stack editor and panel instead of side-by-side */
+  .app-root {
+    flex-direction: column;
+    height: auto;
+    max-height: none;
+  }
+
+  .editor-container {
+    border-right: none;
+    border-bottom: 1px solid #111827;
+    /* let editor take majority of viewport */
+    height: 60vh;
+  }
+
   .a11y-panel {
-    width: 320px;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    height: auto;
+    max-height: 40vh; /* own scroll area on mobile */
   }
 }

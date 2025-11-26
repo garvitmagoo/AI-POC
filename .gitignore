@@ -1,0 +1,42 @@
+
+---
+
+# 📦 `.gitignore` (drop-in)
+
+```gitignore
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log
+dist/
+build/
+.cache/
+.vite/
+
+# Env
+.env
+.env.local
+.env.production
+.env.development
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+venv/
+
+# IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Logs
+logs/
+*.log
+
+# OS files
+Thumbs.db
