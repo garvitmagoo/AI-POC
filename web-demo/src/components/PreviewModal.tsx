@@ -1,156 +1,19 @@
-// src/components/PreviewModal.tsx
-import type { FC, CSSProperties } from "react";
+// web-demo/src/components/PreviewModal.tsx
+import React from "react";
 import type { Issue } from "../../../src/shared/analyzer/types";
-
-export interface EditSnippet {
-  before: string;
-  after: string;
-  locationLabel: string;
-  selected?: boolean; // used in AI mode
-}
+import type { EditSnippet, PreviewMode } from "../types";
 
 interface Props {
   issue: Issue | null;
   snippets: EditSnippet[];
   visible: boolean;
-  mode: "issue" | "ai" | null;
+  mode: PreviewMode;
   onClose: () => void;
-  // selectedIndices is only meaningful for AI mode
-  onApply: (selectedIndices?: number[]) => void;
-  onToggleSnippet?: (index: number) => void;
+  onApply: (indices?: number[]) => void;
+  onToggleSnippet: (index: number) => void;
 }
 
-const overlayStyle: CSSProperties = {
-  position: "fixed",
-  inset: 0,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  zIndex: 9999,
-  background: "rgba(0,0,0,0.55)",
-};
-
-const dialogStyle: CSSProperties = {
-  width: "min(1100px, 95%)",
-  maxHeight: "85vh",
-  background: "#0f1720",
-  color: "#e6eef8",
-  borderRadius: 8,
-  boxShadow: "0 10px 40px rgba(0,0,0,0.6)",
-  padding: 18,
-  display: "flex",
-  flexDirection: "column",
-};
-
-const headerRowStyle: CSSProperties = {
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "flex-start",
-  gap: 12,
-};
-
-const titleStyle: CSSProperties = {
-  margin: 0,
-  fontSize: 18,
-};
-
-const subtitleStyle: CSSProperties = {
-  margin: "6px 0 0 0",
-  color: "#bcd3ee",
-};
-
-const headerButtonsStyle: CSSProperties = {
-  display: "flex",
-  gap: 8,
-};
-
-const cancelButtonStyle: CSSProperties = {
-  background: "transparent",
-  border: "1px solid #334155",
-  color: "#cbd5e1",
-  padding: "6px 10px",
-  borderRadius: 6,
-  cursor: "pointer",
-  fontSize: 13,
-};
-
-const applyButtonBaseStyle: CSSProperties = {
-  padding: "6px 12px",
-  borderRadius: 6,
-  border: "none",
-  color: "white",
-  fontSize: 13,
-};
-
-const contentWrapperStyle: CSSProperties = {
-  marginTop: 14,
-  overflow: "auto",
-  paddingRight: 6,
-};
-
-const snippetGridStyle: CSSProperties = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 12,
-  marginBottom: 14,
-};
-
-const beforeBoxStyle: CSSProperties = {
-  background: "#0b1220",
-  border: "1px solid #27303a",
-  borderRadius: 6,
-  padding: 10,
-};
-
-const afterBoxStyle: CSSProperties = {
-  background: "#071022",
-  border: "1px solid #27303a",
-  borderRadius: 6,
-  padding: 10,
-};
-
-const snippetLabelStyle: CSSProperties = {
-  fontSize: 12,
-  color: "#94a3b8",
-  marginBottom: 8,
-};
-
-const snippetPreStyle: CSSProperties = {
-  margin: 0,
-  whiteSpace: "pre-wrap",
-  wordBreak: "break-word",
-  fontSize: 13,
-};
-
-const noFixBoxStyle: CSSProperties = {
-  padding: 12,
-  background: "#07101a",
-  borderRadius: 6,
-  border: "1px solid #22303a",
-};
-
-const noteStyle: CSSProperties = {
-  fontSize: 12,
-  color: "#9fb0cc",
-  marginTop: 12,
-};
-
-const listItemStyle: CSSProperties = {
-  color: "#9fb0cc",
-};
-
-const checkboxRowStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: 8,
-  marginBottom: 6,
-  fontSize: 12,
-  color: "#cbd5e1",
-};
-
-// ---------- Component ----------
-
-const PreviewModal: FC<Props> = ({
+export default function PreviewModal({
   issue,
   snippets,
   visible,
@@ -158,140 +21,267 @@ const PreviewModal: FC<Props> = ({
   onClose,
   onApply,
   onToggleSnippet,
-}) => {
+}: Props) {
   if (!visible) return null;
 
-  const isAISuggestions = mode === "ai";
-  const hasAnySelectedAI = isAISuggestions
-    ? snippets.some((s) => s.selected)
-    : false;
+  const isAiMode = mode === "ai";
+  const hasSnippets = snippets && snippets.length > 0;
 
-  const hasFix = isAISuggestions ? hasAnySelectedAI : snippets.length > 0;
+  const headerTitle = isAiMode
+    ? "AI Suggestions"
+    : issue?.id || "Suggested Fix";
 
-  const title = isAISuggestions ? "AI Suggestions" : issue?.id ?? "Preview";
-  const subtitle = isAISuggestions
+  const headerSubtitle = isAiMode
     ? "Select which AI-generated fixes you want to apply."
-    : issue?.message ?? "Preview of automatic fix for this issue.";
-
-  const applyButtonStyle: CSSProperties = hasFix
-    ? {
-        ...applyButtonBaseStyle,
-        background: "#0078d4",
-        cursor: "pointer",
-      }
-    : {
-        ...applyButtonBaseStyle,
-        background: "#334155",
-        cursor: "not-allowed",
-      };
+    : issue?.message || "Preview the proposed fix before applying.";
 
   const handleApplyClick = () => {
-    if (!hasFix) return;
-
-    if (isAISuggestions) {
-      const selectedIndices = snippets
-        .map((s, idx) => (s.selected ? idx : -1))
-        .filter((idx) => idx !== -1);
-      onApply(selectedIndices);
-    } else {
-      onApply(); // issue mode: all-or-nothing
-    }
+    onApply(); // use selected flags; mapping is done in useAiFixes
   };
 
   return (
-    <div role="dialog" aria-modal="true" style={overlayStyle} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={dialogStyle}>
-        <div style={headerRowStyle}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      style={{
+        position: "fixed",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+        background: "rgba(0,0,0,0.55)",
+      }}
+      onClick={onClose}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: "min(1100px, 95%)",
+          maxHeight: "85vh",
+          background: "#020617",
+          color: "#e6eef8",
+          borderRadius: 10,
+          boxShadow: "0 20px 60px rgba(0,0,0,0.7)",
+          padding: 20,
+          display: "flex",
+          flexDirection: "column",
+          boxSizing: "border-box",
+        }}
+      >
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            gap: 12,
+            marginBottom: 14,
+          }}
+        >
           <div>
-            <h3 style={titleStyle}>{title}</h3>
-            <p style={subtitleStyle}>{subtitle}</p>
+            <h3 style={{ margin: 0, fontSize: 18 }}>{headerTitle}</h3>
+            <p
+              style={{
+                margin: "6px 0 0 0",
+                color: "#9ca3af",
+                fontSize: 14,
+              }}
+            >
+              {headerSubtitle}
+            </p>
           </div>
 
-          <div style={headerButtonsStyle}>
-            <button type="button" onClick={onClose} style={cancelButtonStyle}>
+          <div style={{ display: "flex", gap: 8 }}>
+            <button
+              onClick={onClose}
+              style={{
+                background: "transparent",
+                border: "1px solid #374151",
+                color: "#e5e7eb",
+                padding: "6px 12px",
+                borderRadius: 6,
+                cursor: "pointer",
+                fontSize: 13,
+              }}
+            >
               Cancel
             </button>
-
             <button
-              type="button"
               onClick={handleApplyClick}
-              disabled={!hasFix}
-              style={applyButtonStyle}
+              disabled={!hasSnippets}
+              style={{
+                background: hasSnippets ? "#3b82f6" : "#1f2937",
+                border: "none",
+                color: "white",
+                padding: "6px 14px",
+                borderRadius: 6,
+                cursor: hasSnippets ? "pointer" : "not-allowed",
+                fontSize: 13,
+                fontWeight: 500,
+              }}
             >
-              {hasFix
-                ? isAISuggestions
-                  ? "Apply selected"
-                  : "Apply changes"
-                : "No automatic fix"}
+              {isAiMode ? "Apply selected" : "Apply"}
             </button>
           </div>
         </div>
 
-        <div style={contentWrapperStyle}>
-          {snippets.length > 0 ? (
-            snippets.map((s, idx) => (
-              <div key={idx}>
-                {isAISuggestions && (
-                  <div style={checkboxRowStyle}>
-                    <input
-                      type="checkbox"
-                      checked={s.selected ?? true}
-                      onChange={() => onToggleSnippet && onToggleSnippet(idx)}
-                    />
-                    <span>{s.locationLabel}</span>
-                  </div>
-                )}
+        {/* Snippets list */}
+        <div
+          style={{
+            marginTop: 4,
+            overflow: "auto",
+            paddingRight: 4,
+          }}
+        >
+          {hasSnippets ? (
+            snippets.map((s, idx) => {
+              const checked = s.selected !== false;
 
-                <div style={snippetGridStyle}>
-                  <div style={beforeBoxStyle}>
-                    <div style={snippetLabelStyle}>
-                      {s.locationLabel} — before
-                    </div>
-                    <pre style={snippetPreStyle}>{s.before}</pre>
+              return (
+                <div
+                  key={idx}
+                  style={{
+                    marginBottom: 16,
+                    padding: 14,
+                    borderRadius: 10,
+                    background: "#0b1220",
+                    border: "1px solid #1f2937",
+                  }}
+                >
+                  {/* Header Row with checkbox + label */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      marginBottom: 10,
+                    }}
+                  >
+                    {/* Checkbox + label horizontally */}
+                    <label
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        cursor: "pointer",
+                        fontSize: 14,
+                        fontWeight: 500,
+                        color: "#e5e7eb",
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={() => onToggleSnippet(idx)}
+                        style={{ width: 16, height: 16, cursor: "pointer" }}
+                      />
+                      <span>{s.locationLabel}</span>
+                    </label>
+
+                    <span style={{ fontSize: 13, color: "#9ca3af" }}>
+                      Suggested change
+                    </span>
                   </div>
 
-                  <div style={afterBoxStyle}>
-                    <div style={snippetLabelStyle}>
-                      {s.locationLabel} — after
+                  {/* Before/After Code Grid */}
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 12,
+                    }}
+                  >
+                    <div
+                      style={{
+                        background: "#020617",
+                        border: "1px solid #1f2937",
+                        borderRadius: 6,
+                        padding: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#9ca3af",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {s.locationLabel} — before
+                      </div>
+                      <pre
+                        style={{
+                          margin: 0,
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                          fontSize: 13,
+                        }}
+                      >
+                        {s.before}
+                      </pre>
                     </div>
-                    <pre style={snippetPreStyle}>{s.after}</pre>
+
+                    <div
+                      style={{
+                        background: "#020617",
+                        border: "1px solid #1f2937",
+                        borderRadius: 6,
+                        padding: 10,
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 12,
+                          color: "#9ca3af",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {s.locationLabel} — after
+                      </div>
+                      <pre
+                        style={{
+                          margin: 0,
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-word",
+                          fontSize: 13,
+                        }}
+                      >
+                        {s.after}
+                      </pre>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
-            <div style={noFixBoxStyle}>
-              <p style={{ margin: 0, color: "#bcd3ee" }}>
-                This rule or suggestion does not have an automatic fix. You can:
-              </p>
-              <ul style={{ marginTop: 8 }}>
-                <li style={listItemStyle}>
-                  Manually update the code where the issue is highlighted.
-                </li>
-                <li style={listItemStyle}>
-                  Use the Jump button to navigate to the problem location.
-                </li>
-              </ul>
+            <div
+              style={{
+                padding: 12,
+                background: "#020617",
+                borderRadius: 6,
+                border: "1px solid #1f2933",
+                fontSize: 14,
+                color: "#e5e7eb",
+              }}
+            >
+              No automatic fix preview is available for this rule.
             </div>
           )}
 
-          <div style={noteStyle}>
-            {isAISuggestions ? (
-              <>
-                You can uncheck any AI suggestion you don&apos;t want to apply.
-                Only selected changes will be applied.
-              </>
-            ) : (
-              <>
-                Apply is disabled when no automatic fix is available. You can
-                still navigate to the issue and fix it manually.
-              </>
-            )}
-          </div>
+          {isAiMode && (
+            <div
+              style={{
+                fontSize: 12,
+                color: "#9ca3af",
+                marginTop: 8,
+              }}
+            >
+              You can uncheck any AI suggestion you don't want to apply. Only
+              selected changes will be applied.
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
-};
-
-export default PreviewModal;
+}

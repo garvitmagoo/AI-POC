@@ -1,4 +1,4 @@
-/* -------- Global layout basics -------- */
+/* Root sizing ------------------------------------------------------------ */
 
 html,
 body,
@@ -8,51 +8,54 @@ body,
   height: 100%;
 }
 
-/* Root two-column layout (desktop) */
+/* Main app layout: editor + side panel ---------------------------------- */
 
 .app-root {
   display: flex;
-  height: 100vh;
-  max-height: 100vh;
+  height: 100%;
+  width: 100%;
   overflow: hidden;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
   background: #020617;
 }
 
-/* Monaco editor container */
+/* Left side: Monaco editor container */
 
 .editor-container {
   flex: 1 1 auto;
-  min-width: 0; /* important so editor doesn't push panel offscreen */
+  min-width: 0; /* 👈 so it can shrink beside the panel */
+  min-height: 0; /* 👈 so Monaco can fill-height correctly */
   box-sizing: border-box;
-  padding: 16px 12px;
+  padding: 12px;
   background: #1e1e1e;
   border-right: 1px solid #111827;
 }
 
-/* Right-hand accessibility panel */
+/* Ensure Monaco content scrolls, not the outer layout */
+
+.monaco-editor {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: auto !important;
+}
+
+/* Right side: issues panel ---------------------------------------------- */
 
 .a11y-panel {
-  flex: 0 0 360px;
+  flex: 0 0 360px; /* fixed sidebar width on desktop */
   max-width: 420px;
-  min-width: 280px;
+  min-width: 300px;
   box-sizing: border-box;
   border-left: 1px solid #111827;
   background: #020617;
   display: flex;
   flex-direction: column;
   padding: 16px;
-  overflow-y: auto;
+  overflow-y: auto; /* scroll inside the panel if tall */
 }
 
-/* Make sure Monaco itself can scroll inside its container */
-
-.monaco-editor {
-  overflow: auto !important;
-}
-
-/* -------- Monaco decoration helpers -------- */
+/* Monaco decoration helpers --------------------------------------------- */
 
 .a11y-highlight {
   background-color: rgba(79, 195, 247, 0.08);
@@ -67,7 +70,7 @@ body,
   background-position: center;
 }
 
-/* Code font used in PreviewModal */
+/* Code font in the preview modal */
 
 .preview-modal-pre {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono",
@@ -76,21 +79,18 @@ body,
   color: #e6eef8;
 }
 
-/* -------- Mobile / small screens -------- */
+/* Responsive: stack on narrow screens ----------------------------------- */
 
-@media (max-width: 768px) {
-  /* stack editor and panel instead of side-by-side */
+@media (max-width: 900px) {
   .app-root {
     flex-direction: column;
     height: auto;
-    max-height: none;
   }
 
   .editor-container {
     border-right: none;
     border-bottom: 1px solid #111827;
-    /* let editor take majority of viewport */
-    height: 60vh;
+    height: 55vh; /* editor top, panel bottom */
   }
 
   .a11y-panel {
@@ -98,7 +98,6 @@ body,
     width: 100%;
     max-width: none;
     min-width: 0;
-    height: auto;
-    max-height: 40vh; /* own scroll area on mobile */
+    max-height: 45vh;
   }
 }

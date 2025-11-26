@@ -1,7 +1,16 @@
 import { useState } from "react";
 import * as monaco from "monaco-editor";
 import type { Issue } from "../../../src/shared/analyzer/types";
-import type { EditSnippet, PreviewMode, PreviewState } from "../types";
+import type { EditSnippet, PreviewMode } from "../types";
+
+type MonacoEdit = { range: monaco.Range; text: string };
+
+type PreviewState = {
+  visible: boolean;
+  mode: PreviewMode;
+  issue: Issue | null;
+  snippets: EditSnippet[];
+};
 
 const RAW_API_BASE =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
@@ -15,8 +24,6 @@ type BackendEdit = {
 };
 type GenerateResponse = { edits?: BackendEdit[] };
 
-type MonacoEdit = { range: monaco.Range; text: string };
-
 export function useAiFixes(
   editorRef: React.MutableRefObject<monaco.editor.IStandaloneCodeEditor | null>,
   applyEditsWithReveal: (edits: MonacoEdit[], source: string) => void,
@@ -29,19 +36,22 @@ export function useAiFixes(
     snippets: [],
   });
 
+  // All edits returned from backend (flat list)
   const [pendingAiEdits, setPendingAiEdits] = useState<MonacoEdit[]>([]);
 
-  // open preview for a single TS issue
+  // ---------- Preview control for TS issue mode ----------
+
   function openPreviewForIssue(issue: Issue, issueEdits: MonacoEdit[]) {
     const snippets = buildSnippetsFromEdits(issueEdits);
     if (!snippets.length) return;
+
     setPreview({
       visible: true,
       mode: "issue",
       issue,
       snippets,
     });
-    setPendingAiEdits([]);
+    setPendingAiEdits([]); // TS issue mode doesn't use AI edits
   }
 
   function closePreview() {
@@ -55,7 +65,6 @@ export function useAiFixes(
   }
 
   function toggleSnippet(index: number) {
-    if (preview.mode !== "ai") return;
     setPreview((prev) => ({
       ...prev,
       snippets: prev.snippets.map((sn, i) =>
@@ -64,35 +73,71 @@ export function useAiFixes(
     }));
   }
 
+  // ---------- Apply button logic ----------
+
   function applyPreview(selectedIndices?: number[]) {
+    // 1) TS issue mode – all-or-nothing, caller handles actual edits
     if (preview.mode === "issue" && preview.issue) {
-      // issue mode: all-or-nothing
-      // actual edits are built outside and passed in when calling openPreviewForIssue
-      // so here we just signal "apply"; actual apply is done by caller or we can
-      // choose to not use selectedIndices at all for issue mode.
+      // we just close; App uses handleFixIssue(issue) if needed
       closePreview();
       return;
     }
 
+    // 2) AI mode – apply only edits corresponding to selected snippets
     if (preview.mode === "ai" && pendingAiEdits.length) {
-      const indicesToApply =
+      // Which snippets are "selected"?
+      const activeSnippetIndexes = new Set<number>(
         selectedIndices && selectedIndices.length
           ? selectedIndices
-          : pendingAiEdits.map((_, idx) => idx);
+          : (preview.snippets
+              .map((sn, i) => (sn.selected === false ? null : i))
+              .filter((v) => v !== null) as number[])
+      );
 
-      if (!indicesToApply.length) {
+      if (!activeSnippetIndexes.size) {
         closePreview();
         return;
       }
 
-      const editsToApply = indicesToApply.map((idx) => pendingAiEdits[idx]);
+      // Collect all line numbers for those snippets
+      const linesToApply = new Set<number>();
+
+      preview.snippets.forEach((sn, i) => {
+        if (!activeSnippetIndexes.has(i)) return;
+
+        // We encode line info in locationLabel, e.g. "Line 3" or "Lines 3-5"
+        const matches = [...sn.locationLabel.matchAll(/\d+/g)];
+        matches.forEach((m) => {
+          const num = parseInt(m[0], 10);
+          if (!Number.isNaN(num)) linesToApply.add(num);
+        });
+      });
+
+      if (!linesToApply.size) {
+        closePreview();
+        return;
+      }
+
+      // Pick ONLY the backend edits whose start line is in linesToApply
+      const editsToApply = pendingAiEdits.filter((ed) =>
+        linesToApply.has(ed.range.startLineNumber)
+      );
+
+      if (!editsToApply.length) {
+        closePreview();
+        return;
+      }
+
       applyEditsWithReveal(editsToApply, "a11y-ai-preview-apply");
       closePreview();
       return;
     }
 
+    // Fallback
     closePreview();
   }
+
+  // ---------- Call backend /generate ----------
 
   async function generateAiFixes() {
     const editor = editorRef.current;
@@ -127,7 +172,9 @@ export function useAiFixes(
         });
 
         const snippets = buildSnippetsFromEdits(monacoEdits);
+
         if (!snippets.length) {
+          // nothing to preview – just apply everything
           applyEditsWithReveal(
             monacoEdits,
             "a11y-generate-placeholders-nopreview"

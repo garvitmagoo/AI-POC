@@ -9,7 +9,11 @@ export function useMonacoEditor(onChange?: (code: string) => void) {
     if (!containerRef.current) return;
 
     const editor = monaco.editor.create(containerRef.current, {
-      value: `<img src="hero.jpg"/>\n<button></button>`,
+      value: `<img src="hero.jpg"/>
+<button></button>
+<a href="/home"></a>
+<h1>Title</h1>
+<h3>Subsection</h3>`,
       language: "plaintext",
       theme: "vs-dark",
       automaticLayout: true,
